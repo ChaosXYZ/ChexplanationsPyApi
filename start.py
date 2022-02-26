@@ -1,3 +1,24 @@
-Python 3.8.5 (tags/v3.8.5:580fbb0, Jul 20 2020, 15:57:54) [MSC v.1924 64 bit (AMD64)] on win32
-Type "help", "copyright", "credits" or "license()" for more information.
->>> 
+from flask import Flask
+from flask_restful import Api, Resource
+import engine
+
+
+app = Flask(__name__)
+api = Api(app)
+
+
+
+class BestMove(Resource):
+    def get(self, FEN, move):
+        FEN = FEN.replace("!", "/")
+        best = engine.returnBest(FEN, move)
+        return {"Current FEN": FEN,
+                "Move Played": move,
+                "Best Response": best}
+
+api.add_resource(BestMove, "/BestMove/<string:FEN>/<string:move>")
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
+    
