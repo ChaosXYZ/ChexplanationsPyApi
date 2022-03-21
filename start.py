@@ -12,9 +12,10 @@ class BestMove(Resource):
     def get(self, FEN, move):
         FEN = FEN.replace("!", "/")
         best = engine.returnBest(FEN, move)
+        print('worked')
         return {"Current FEN": FEN,
                 "Move Played": move,
-                "Best Response": best}
+                "BestResponse": best}
 
 class Refute(Resource):
     def get(self, FEN, move):
@@ -29,5 +30,6 @@ api.add_resource(Refute, "/Refute/<string:FEN>/<string:move>")
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.debug = True
+    app.run(host='10.204.199.233')
     
