@@ -14,6 +14,11 @@ pieceValue = {
     "r":5
     }
 digits = ['1','2','3','4','5','6','7','8']
+
+def bestMove(FEN):
+    s.set_fen_position(FEN)
+    return s.get_best_move()
+
 def returnBest(FEN, Move):
     """Returns the best move in response to a proposed move"""
     s.set_fen_position(FEN)
@@ -104,7 +109,7 @@ def explain(FEN):
     elif countPieces(FEN)[5] > 2: sentences.append('You have a strong material advantage.')
     elif countPieces(FEN)[5] > 0: sentences.append('You have a slight material advantage.')
     if countPieces(FEN)[5] < -6: sentences.append('You have an overwhelming material disadvantage.')
-    elif countPieces(FEN)[5] < -2: sentences.append('You have a strong material disadvantage.')
+    elif countPieces(FEN)[5] < -2: sentences.append('You have a devastating material disadvantage.')
     elif countPieces(FEN)[5] < 0: sentences.append('You have a slight material disadvantage.')
 
     cScore = centralised(FEN)

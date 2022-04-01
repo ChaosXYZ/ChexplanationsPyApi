@@ -41,6 +41,18 @@ nameValues = {
     "white Pawn":1,
     }
 
+def paraform(sentences):
+    paragraph = ""
+    for i in sentences:
+        paragraph += i+"\n"
+    return paragraph
+
+def paraformN(sentences):
+    paragraph = ""
+    for i in sentences:
+        paragraph += i+"\n"
+    return paragraph
+
 def virtualBoard(FEN):
     centralisation, kFlag = 0, 0
     boardLayout = FEN.split()[0]
@@ -71,7 +83,7 @@ def movement(FEN, square, piece):
         moves += [[L[0]-1, L[1]+1],[L[0]-1, L[1]-1]]
     if piece == "p":
         if board[L[0]+1][L[1]] == "":
-            moves += [[L[0]-1, L[1]]]
+            moves += [[L[0]+1, L[1]]]
         moves += [[L[0]+1, L[1]+1],[L[0]+1, L[1]-1]]
 
     #Bishop
@@ -222,6 +234,7 @@ def movement(FEN, square, piece):
         #Diagonal
         moves += [[L[0]-1,L[1]-1],[L[0]-1,L[1]+1],[L[0]+1,L[1]-1],[L[0]+1,L[1]+1]]
         moves = [i for i in moves if (i[0] < 8 and i[0] > -1 and i[1] < 8 and i[1] > -1)]
+    moves = [i for i in moves if (i[0] < 8 and i[0] > -1 and i[1] < 8 and i[1] > -1)]
     return moves
     
 
@@ -273,7 +286,10 @@ def defending(FEN, square, piece, exclude = None):
     movelist = movement(FEN, square, piece)
     if exclude != None:
         excludesquare = [8-int(exclude[1]),file2py[exclude[0]]]
-        movelist.remove(excludesquare)
+        try:
+            movelist.remove(excludesquare)
+        except:
+            pass
         
     if colour == "w":
         for i in movelist:
@@ -478,6 +494,7 @@ def pinMovement(FEN, square, piece):
 
 def pinsAndDiscoveries(FEN, square):
     sentences = []
+    pinList = []
     board = virtualBoard(FEN)
     L = [8-int(square[1]),file2py[square[0]]]
     piece = board[L[0]][L[1]]
@@ -501,11 +518,13 @@ def pinsAndDiscoveries(FEN, square):
                 #print("The {0} on {1} is strongly pinned to the {2} on {3}.".format(pieceName[piece1], py2board(i[0]), pieceName[piece2], py2board(i[1])))
                 s_temp = "The {0} on {1} is strongly pinned to the {2} on {3}.".format(pieceName[piece1], py2board(i[0]), pieceName[piece2], py2board(i[1]))
                 sentences.append(s_temp)
+                pinList.append([[piece, square], [piece1, py2board(i[0])], [piece2, py2board(i[1])]])
             if piece1 not in whitePieces and piece2 not in whitePieces and piece2 != "k":
                 if piece1Val < piece2Val:
                     #print("The {0} on {1} is pinned to the {2} on {3}".format(pieceName[piece1], py2board(i[0]), pieceName[piece2], py2board(i[1])))
                     s_temp = "The {0} on {1} is pinned to the {2} on {3}".format(pieceName[piece1], py2board(i[0]), pieceName[piece2], py2board(i[1]))
                     sentences.append(s_temp)
+                    pinList.append([[piece, square], [piece1, py2board(i[0])], [piece2, py2board(i[1])]])
             if piece1 in whitePieces and piece2 not in whitePieces:
                 if pieceValue < piece2Val:
                     #print("The {0} on {1} threatens a discovery on the {2} on {3} if the {4} on {5} were to be moved".format(pieceName[piece],square,pieceName[piece2],py2board(i[1]),pieceName[piece1],py2board(i[0])))
@@ -523,21 +542,27 @@ def pinsAndDiscoveries(FEN, square):
                 #print("The {0} on {1} is strongly pinned to the {2} on {3}.".format(pieceName[piece1], py2board(i[0]), pieceName[piece2], py2board(i[1])))
                 s_temp = "The {0} on {1} is strongly pinned to the {2} on {3}.".format(pieceName[piece1], py2board(i[0]), pieceName[piece2], py2board(i[1]))
                 sentences.append(s_temp)
+                pinList.append([[piece, square], [piece1, py2board(i[0])], [piece2, py2board(i[1])]])
             if piece1 in whitePieces and piece2 in whitePieces and piece2 != "K":
                 if piece1Val < piece2Val:
                     #print("The {0} on {1} is pinned to the {2} on {3}".format(pieceName[piece1], py2board(i[0]), pieceName[piece2], py2board(i[1])))
-                    s_temp = "The {0} on {1} is pinned to the {2} on {3}".format(pieceName[piece1], py2board(i[0]), pieceName[piece2], py2board(i[1]))
+                    s_temp = "The {0} on {1} is pinned to the {2} on {3}.".format(pieceName[piece1], py2board(i[0]), pieceName[piece2], py2board(i[1]))
                     sentences.append(s_temp)
+                    pinList.append([[piece, square], [piece1, py2board(i[0])], [piece2, py2board(i[1])]])
             if piece1 not in whitePieces and piece2 in whitePieces:
                 if pieceValue < piece2Val:
                     #print("The {0} on {1} threatens a discovery on the {2} on {3} if the {4} on {5} were to be moved".format(pieceName[piece],square,pieceName[piece2],py2board(i[1]),pieceName[piece1],py2board(i[0])))
-                    s_temp = "The {0} on {1} threatens a discovery on the {2} on {3} if the {4} on {5} were to be moved".format(pieceName[piece],square,pieceName[piece2],py2board(i[1]),pieceName[piece1],py2board(i[0]))
+                    s_temp = "The {0} on {1} threatens a discovery on the {2} on {3} if the {4} on {5} were to be moved.".format(pieceName[piece],square,pieceName[piece2],py2board(i[1]),pieceName[piece1],py2board(i[0]))
                     sentences.append(s_temp)
-    return sentences
+    return [sentences, pinList]
                 
                     
                 
-            
+def doubled(FEN, move):
+    old = move[0:2]
+    to = move[2:4]
+    board = virtualBoard(FEN)
+    piece = board[8-int(to[1])][file2py[to[0]]]
         
 
 def tacticalExplain(FEN, move):
@@ -562,6 +587,8 @@ def tacticalExplain(FEN, move):
         temp = "This move attacks the {0} on {1}.".format(i[0], i[1])
         sentences.append(temp)
     for i in defendList:
+        if i[0] == "white King" or i[0] == "black King":
+            continue
         temp = "This move defends the {0} on {1}.".format(i[0], i[1])
         sentences.append(temp)
     for i in oldDefend:
@@ -570,4 +597,130 @@ def tacticalExplain(FEN, move):
 
     return sentences
     
+
+def allPieceLocation(FEN):
+    board = virtualBoard(FEN)
+    pieceList = []
+    for i in range(len(board)):
+        for j in range(len(board[i])):
+            if board[i][j] != "":
+                pieceList.append([board[i][j], py2board([i, j])])
+    return pieceList
+
+def allPins(FEN):
+    pieceLocs = [i[1] for i in allPieceLocation(FEN)]
+    allPins = []
+    for i in pieceLocs:
+        pins = pinsAndDiscoveries(FEN, i)
+        if len(pins) > 0:
+            allPins.append(pins[1])
+    return [x for x in allPins if x != []]
+
+def allAttacks(FEN):
+    board = virtualBoard(FEN)
+    pieces = allPieceLocation(FEN)
+    attacks = []
+    for i in pieces:
+        attackList = attacking(FEN, i[1])
+        for j in attackList:
+            attacks.append(i+j)
+    return attacks
+
+def allDefends(FEN):
+    board = virtualBoard(FEN)
+    pieces = allPieceLocation(FEN)
+    defends = []
+    for i in pieces:
+        defendList = defending(FEN, i[1], i[0])
+        for j in defendList:
+            defends.append(i+j)
+    return defends
+
+def SQ_attacks(FEN, square):
+    sentences = []
+    attacks = attacking(FEN, square)
+    numberofcenters = attacks.count(['CENTER'])
+    attacks = [x for x in attacks if x != ['CENTER']]
+    if numberofcenters == 1:
+        centers = "This move pressures 1 central square."
+    else:  
+        centers = "This move pressures {0} central squares.".format(numberofcenters)
+    if numberofcenters > 0:
+        sentences.append(centers)
+
+    for i in attacks:
+        temp = "This move attacks the {0} on {1}.".format(i[0], i[1])
+        sentences.append(temp)
+    return sentences
+
+def SQ_defends(FEN, square, piece):
+    sentences = []
+    defends = defending(FEN, square, piece)
+    for i in defends:
+        if i[0] == "white King" or i[0] == "black King":
+            continue
+        temp = "This move defends the {0} on {1}.".format(i[0], i[1])
+        sentences.append(temp)
+    return sentences
+
+def SQ_attacked(FEN, square):
+    attackList = allAttacks(FEN)
+    attackList = [x for x in attackList if x[2] != 'CENTER']
+    sentences = []
+    for i in attackList:
+        if i[3] == square:
+            temp = "This piece is attacked by the {0} on {1}.".format(pieceName[i[0]], i[1])
+            sentences.append(temp)
+    return sentences
+
+def SQ_defended(FEN, square):
+    defendList = allDefends(FEN)
+    sentences = []
+    for i in defendList:
+        if i[3] == square:
+            temp = "This piece is defended by the {0} on {1}.".format(pieceName[i[0]], i[1])
+            sentences.append(temp)
+    return sentences
+
+def SQ_pins(FEN, square):
+    pinList = allPins(FEN)
+    sentences = []
+    for i in pinList:
+        if i[0][0][1] == square:
+            temp = "This piece pins the {0} on {1} to the {2} on {3}.".format(pieceName[i[0][1][0]], i[0][1][1], pieceName[i[0][2][0]], i[0][2][1])
+            sentences.append(temp)
+        if i[0][1][1] == square:
+            temp = "This piece is pinned to the {0} on {1} by the {2} on {3}.".format(pieceName[i[0][2][0]], i[0][2][1], pieceName[i[0][0][0]], i[0][0][1])
+            sentences.append(temp)
+    return sentences
+
+def isPinned(FEN, square):
+    pinList = allPins(FEN)
+    sentences = []
+    for i in pinList:
+        if i[0][1][1] == square:
+            temp = "However, this piece is pinned to the {0} on {1} by the {2} on {3}.".format(pieceName[i[0][2][0]], i[0][2][1], pieceName[i[0][0][0]], i[0][0][1])
+            sentences.append(temp)
+    if len(sentences) > 0:
+        sentences.append("This means it might be not be able to perform its duties.")
+    return sentences
+
+def SQ_explain(FEN, square):
+    board = virtualBoard(FEN)
+    L = [8-int(square[1]),file2py[square[0]]]
+    piece = board[L[0]][L[1]]
+    attacks = SQ_attacks(FEN, square)
+    defends = SQ_defends(FEN, square, piece)
+    attacked = SQ_attacked(FEN, square)
+    defended = []
+    if piece != "K" or piece != "k":
+        defended = SQ_defended(FEN, square)
+    pins = SQ_pins(FEN, square)
+    ispinned = isPinned(FEN, square)
+    sentences = pins+attacks+attacked+defends+defended+ispinned
+    for i in range(len(sentences)):
+        if "move" in sentences[i]:
+            sentences[i] = sentences[i].replace("move", "piece")
+    return paraform(sentences)
+
 
